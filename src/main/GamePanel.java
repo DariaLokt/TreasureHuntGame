@@ -1,6 +1,7 @@
 package main;
 
 import entity.Player;
+import tile.TileManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,11 +13,19 @@ public class GamePanel extends JPanel implements Runnable {
     final int originalTileSize = 16;
     final int scale = 3;
 
-    public final int tileSize = originalTileSize * scale;
-    final int maxScreenCol = 16;
-    final int maxScreenRow = 12;
-    final int screenWidth = tileSize * maxScreenCol;
-    final int screenHeight = tileSize * maxScreenRow;
+    public final int tileSize = originalTileSize * scale; //48*48
+    public final int maxScreenCol = 16;
+    public final int maxScreenRow = 12;
+    public final int screenWidth = tileSize * maxScreenCol; //768
+    public final int screenHeight = tileSize * maxScreenRow; //576
+
+    /*
+    WORLD SETTINGS
+     */
+    public final int maxWorldCol = 50;
+    public final int maxWorldRaw = 50;
+    public final int worldWidth = tileSize * maxWorldCol;
+    public final int worldHeight = tileSize * maxWorldRaw;
 
     /*
     FPS
@@ -25,18 +34,13 @@ public class GamePanel extends JPanel implements Runnable {
 
     Thread gameThread;
     KeyHandler keyHandler = new KeyHandler();
-    Player player = new Player(this, keyHandler);
-
-    /*
-    PLAYER'S DEFAULT POSITION
-     */
-    int playerX = 100;
-    int playerY = 100;
-    int playerSpeed = 4;
+    public Player player = new Player(this, keyHandler);
+    TileManager tileManager = new TileManager(this);
+    public CollisionManager collisionManager = new CollisionManager(this);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
-        this.setBackground(Color.orange);
+        this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.addKeyListener(keyHandler);
         this.setFocusable(true);
@@ -85,6 +89,8 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
+
+        tileManager.draw(g2);
 
         player.draw(g2);
 

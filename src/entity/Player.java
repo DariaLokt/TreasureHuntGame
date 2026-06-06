@@ -12,19 +12,32 @@ public class Player extends Entity {
     GamePanel gamePanel;
     KeyHandler keyHandler;
 
+    public final int screenX;
+    public final int screenY;
+
     public Player(GamePanel gamePanel, KeyHandler keyHandler) {
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
+
+        screenX = gamePanel.screenWidth / 2 - (gamePanel.tileSize / 2);
+        screenY = gamePanel.screenHeight / 2 - (gamePanel.tileSize / 2);
+
+        solidArea = new Rectangle();
+        solidArea.x = 8;
+        solidArea.y = 16;
+        solidArea.height = 32;
+        solidArea.width = 32;
 
         setDefaultValues();
         getPlayerImage();
     }
 
     public void setDefaultValues() {
-        x = 100;
-        y = 100;
+        worldX = gamePanel.tileSize * 23;
+        worldY = gamePanel.tileSize * 21;
         speed = 4;
         movingStatus = "still";
+        direction = "up";
     }
 
     public void getPlayerImage() {
@@ -38,26 +51,46 @@ public class Player extends Entity {
     }
 
     public void update() {
+        if (!keyHandler.rightPressed && !keyHandler.leftPressed &&
+                !keyHandler.downPressed && !keyHandler.upPressed) {
+            this.setMovingStatus("still");
+        }
         if (keyHandler.upPressed) {
-            y -= speed;
-            movingStatus = "moving";
+            this.setMovingStatus("moving");
+            this.setDirection("up");
         }
         if (keyHandler.downPressed) {
-            y += speed;
-            movingStatus = "moving";
+            this.setMovingStatus("moving");
+            this.setDirection("down");
         }
         if (keyHandler.rightPressed) {
-            x += speed;
-            movingStatus = "moving";
+            this.setMovingStatus("moving");
+            this.setDirection("right");
         }
         if (keyHandler.leftPressed) {
-            x -= speed;
-            movingStatus = "moving";
-        }
-        if (!keyHandler.upPressed && !keyHandler.downPressed && !keyHandler.rightPressed && !keyHandler.leftPressed) {
-            movingStatus = "still";
+            this.setMovingStatus("moving");
+            this.setDirection("left");
         }
 
+        /*
+        CHECK COLLISION
+         */
+        this.setCollisionOn(false);
+        gamePanel.collisionManager.checkTile(this);
+
+        if (!collisionOn && movingStatus.equals("moving")) {
+            switch (direction) {
+                case "up" -> worldY -= speed;
+                case "down" -> worldY += speed;
+                case "left" -> worldX -= speed;
+                case "right" -> worldX += speed;
+            }
+        }
+
+        changeSpriteNumber();
+    }
+
+    private void changeSpriteNumber() {
         spriteCounter++;
         if (spriteCounter > 20) {
             if (spriteNumber == 1) {
@@ -70,8 +103,6 @@ public class Player extends Entity {
     }
 
     public void draw(Graphics2D g2) {
-//        g2.setColor(Color.pink);
-//        g2.fillRect(x, y, gamePanel.tileSize, gamePanel.tileSize);
         BufferedImage image;
         image = switch (movingStatus) {
             case "moving" -> {
@@ -85,6 +116,6 @@ public class Player extends Entity {
             case "still" -> still;
             default -> throw new IllegalStateException("Unexpected value: " + movingStatus);
         };
-        g2.drawImage(image, x, y, gamePanel.tileSize, gamePanel.tileSize, null);
+        g2.drawImage(image, screenX, screenY, gamePanel.tileSize, gamePanel.tileSize, null);
     }
 }
