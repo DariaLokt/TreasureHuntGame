@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Player extends Entity {
     GamePanel gamePanel;
@@ -14,6 +15,8 @@ public class Player extends Entity {
 
     public final int screenX;
     public final int screenY;
+
+    int hasKey = 0;
 
     public Player(GamePanel gamePanel, KeyHandler keyHandler) {
         this.gamePanel = gamePanel;
@@ -25,6 +28,8 @@ public class Player extends Entity {
         solidArea = new Rectangle();
         solidArea.x = 8;
         solidArea.y = 16;
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
         solidArea.height = 32;
         solidArea.width = 32;
 
@@ -42,9 +47,9 @@ public class Player extends Entity {
 
     public void getPlayerImage() {
         try {
-            still = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/1.png"));
-            moving1 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/2.png"));
-            moving2 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/3.png"));
+            still = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("player/1.png")));
+            moving1 = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("player/2.png")));
+            moving2 = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("player/3.png")));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,6 +83,9 @@ public class Player extends Entity {
         this.setCollisionOn(false);
         gamePanel.collisionManager.checkTile(this);
 
+        int objectIndex = gamePanel.collisionManager.checkObject(this, true);
+        pickUpObject(objectIndex);
+
         if (!collisionOn && movingStatus.equals("moving")) {
             switch (direction) {
                 case "up" -> worldY -= speed;
@@ -99,6 +107,27 @@ public class Player extends Entity {
                 spriteNumber = 1;
             }
             spriteCounter = 0;
+        }
+    }
+
+    public void pickUpObject(int index) {
+        if (index != 999) {
+            String name = gamePanel.objects[index].getName();
+
+            switch (name) {
+                case "Key" -> {
+                    hasKey++;
+                    gamePanel.objects[index] = null;
+                    System.out.println("Key: " + hasKey);
+                }
+                case "Door" -> {
+                    if (hasKey > 0) {
+                        gamePanel.objects[index] = null;
+                        hasKey--;
+                        System.out.println("Key: " + hasKey);
+                    }
+                }
+            }
         }
     }
 
