@@ -6,13 +6,14 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class SuperObject {
-    public BufferedImage image;
+    public BufferedImage[] image = new BufferedImage[5];
     public String name;
     public boolean collision = false;
     public int worldX, worldY;
     public Rectangle solidArea = new Rectangle(0, 0, 48, 48);
     public int solidAreaDefaultX = 0;
     public int solidAreaDefaultY = 0;
+    public int state = 0;
 
     public void draw(Graphics2D g2, GamePanel gamePanel) {
         int screenX = worldX - gamePanel.player.worldX + gamePanel.player.screenX;
@@ -23,16 +24,16 @@ public class SuperObject {
                 worldY + gamePanel.tileSize > gamePanel.player.worldY - gamePanel.player.screenY &&
                 worldY - gamePanel.tileSize < gamePanel.player.worldY + gamePanel.player.screenY
         ) {
-            g2.drawImage(image, screenX, screenY, gamePanel.tileSize, gamePanel.tileSize, null);
+            g2.drawImage(image[state], screenX, screenY, gamePanel.tileSize, gamePanel.tileSize, null);
         }
     }
 
-    public BufferedImage getImage() {
-        return image;
+    public BufferedImage getImage(int state) {
+        return image[state];
     }
 
-    public void setImage(BufferedImage image) {
-        this.image = image;
+    public void setImage(BufferedImage image, int state) {
+        this.image[state] = image;
     }
 
     public String getName() {
@@ -65,5 +66,13 @@ public class SuperObject {
 
     public void setWorldY(int worldY) {
         this.worldY = worldY;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 }
